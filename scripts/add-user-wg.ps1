@@ -15,7 +15,7 @@ else
 }
 
 # Создание директорий для конфигов
-$configs_dir = New-Item -ItemType Directory -Path "/etc/wireguard/configs" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path "/etc/wireguard/configs" -ErrorAction SilentlyContinue
 $config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/configs/$config_name" -ErrorAction SilentlyContinue
 
 # Определение октета для нового пользователя
@@ -37,11 +37,9 @@ foreach ($line in $contents) {
 $client_private_key_path = "$config_current_peer_dir\client_$next_octet.pri"
 $client_public_key_path = "$config_current_peer_dir\client_$next_octet.pub"
 $client_preshared_key_path = "$config_current_peer_dir\client_$next_octet.psk"
-echo $client_private_key_path
-echo $client_public_key_path
-echo $client_preshared_key_path
-$cmd = "umask 077; wg genkey | tee $client_private_key_path | wg pubkey > $client_public_key_path; wg genpsk > $client_preshared_key_path"
-echo $cmd
+
+$cmd = "umask 077; wg genkey > $client_private_key_path; Get-Content $client_private_key_path | wg pubkey > $client_public_key_path; wg genpsk > $client_preshared_key_path"
+
 Invoke-Expression -Command $cmd
 
 # Создание конфигурационного файла для нового пользователя
@@ -70,7 +68,7 @@ Endpoint = vpn.continuedev.ru:44121
 PersistentKeepalive = 25
 "@
 $client_config_path = "$config_current_peer_dir\$config_name.conf"
-echo $client_config
+
 Set-Content -Path $client_config_path -Value $client_config
 
 # Удаление сгенерированных файлов с ключами
