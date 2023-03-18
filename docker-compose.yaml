@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  wireguard:
+    stdin_open: true
+    tty: true
+    image: lscr.io/linuxserver/wireguard
+    container_name: ${WG_CONT_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile.dock
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Moscow
+      - SERVERURL=${WG_SERVER_URL}
+      - SERVERPORT=${WG_PORT}
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=${WG_SUBNET}
+      - ALLOWEDIPS=0.0.0.0/0
+    volumes:
+      - ./config:/config
+      - /lib/modules:/lib/modules
+      - ./scripts:/scripts
+    ports:
+      - ${WG_PORT}:${WG_PORT}/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: always
+    healthcheck:
+      test: ping -c 1 www.google.com || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3

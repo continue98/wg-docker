@@ -1,0 +1,79 @@
+param (
+	[parameter(Mandatory=$false)]
+	[String]$conf_name
+)
+
+$config_name = ""
+
+if ($conf_name.Length -gt 0) 
+{
+	$config_name = $conf_name
+} 
+else 
+{
+	$config_name = Read-Host "Enter configuration file name"
+}
+
+# Создание директорий для конфигов
+$configs_dir = New-Item -ItemType Directory -Path "/etc/wireguard/configs" -ErrorAction SilentlyContinue
+$config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/configs/$config_name" -ErrorAction SilentlyContinue
+
+# Определение октета для нового пользователя
+$wg0_conf_path = "/etc/wireguard/wg0.conf"
+$octet_pattern = "(AllowedIPs = 192\.168\.89\.)(\d+)(\/.*)"
+
+$next_octet = 0
+$contents = Get-Content -Path $wg0_conf_path
+
+foreach ($line in $contents) {
+	$matches = $line | Select-String -Pattern $octet_pattern
+	if ($matches) {
+		$next_octet = [int]$matches.Matches.Groups[2].Value + 1
+	}
+}
+
+# Генерация ключей для нового пользователя
+
+$client_private_key_path = "$config_current_peer_dir\client_$next_octet.pri"
+$client_public_key_path = "$config_current_peer_dir\client_$next_octet.pub"
+$client_preshared_key_path = "$config_current_peer_dir\client_$next_octet.psk"
+echo $client_private_key_path
+echo $client_public_key_path
+echo $client_preshared_key_path
+$cmd = "umask 077; wg genkey | tee $client_private_key_path | wg pubkey > $client_public_key_path; wg genpsk > $client_preshared_key_path"
+echo $cmd
+Invoke-Expression -Command $cmd
+
+# Создание конфигурационного файла для нового пользователя
+$wg0_conf_path = "/etc/wireguard/wg0.conf"
+$server_config = @"
+# BEGIN_PEER $config_name
+[Peer]
+PublicKey = $(Get-Content -Path $client_public_key_path)
+PresharedKey = $(Get-Content -Path $client_preshared_key_path)
+AllowedIPs = 192.168.89.$next_octet/32
+# END_PEER $config_name
+"@
+Add-Content -Path $wg0_conf_path -Value $server_config
+
+$client_config = @"
+[Interface]
+PrivateKey = $(Get-Content -Path $client_private_key_path)
+Address = 192.168.89.$next_octet/24
+DNS = 8.8.8.8, 8.8.4.4
+
+[Peer]
+PublicKey = $(Get-Content -Path $wg0_conf_path | Where-Object { $_ -like "*PrivateKey*" } | Select-String -Pattern '(?<=PrivateKey = )(\S+)' | Select-Object -ExpandProperty Matches | Select-Object -First 1 -ExpandProperty Value | wg pubkey)
+PresharedKey = $(Get-Content -Path $client_preshared_key_path)
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = vpn.continuedev.ru:44121
+PersistentKeepalive = 25
+"@
+$client_config_path = "$config_current_peer_dir\$config_name.conf"
+echo $client_config
+Set-Content -Path $client_config_path -Value $client_config
+
+# Удаление сгенерированных файлов с ключами
+# Remove-Item -Path "$client_private_key_path", "$client_public_key_path", "$client_preshared_key_path" -Force
+
+Write-Host "Новый пользователь создан. IP-адрес: 192.168.89.$next_octet"
