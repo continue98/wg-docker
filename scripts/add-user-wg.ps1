@@ -22,7 +22,7 @@ $config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/cl
 $wg0_conf_path = "/etc/wireguard/wg0.conf"
 $octet_pattern = "(AllowedIPs = 192\.168\.89\.)(\d+)(\/.*)"
 
-$next_octet = 0
+$next_octet = 2
 $contents = Get-Content -Path $wg0_conf_path
 
 foreach ($line in $contents) {
