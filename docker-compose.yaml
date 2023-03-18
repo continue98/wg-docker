@@ -17,7 +17,7 @@ services:
       - TZ=Europe/Moscow
       - SERVERURL=${WG_SERVER_URL}
       - SERVERPORT=${WG_PORT}
-      - PEERS=1
+      - PEERS=0
       - PEERDNS=auto
       - INTERNAL_SUBNET=${WG_SUBNET}
       - ALLOWEDIPS=0.0.0.0/0
