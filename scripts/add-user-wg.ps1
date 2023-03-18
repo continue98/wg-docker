@@ -15,11 +15,11 @@ else
 }
 
 # Создание директорий для конфигов
-New-Item -ItemType Directory -Path "/etc/wireguard/client_configs" -ErrorAction SilentlyContinue
-$config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/client_configs/$config_name" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path "/config/client_configs" -ErrorAction SilentlyContinue
+$config_current_peer_dir = New-Item -ItemType Directory -Path "/config/client_configs/$config_name" -ErrorAction SilentlyContinue
 
 # Определение октета для нового пользователя
-$wg0_conf_path = "/etc/wireguard/wg0.conf"
+$wg0_conf_path = "/config/wg0.conf"
 $octet_pattern = "(AllowedIPs = 192\.168\.89\.)(\d+)(\/.*)"
 
 $next_octet = 2
@@ -43,7 +43,6 @@ $cmd = "umask 077; wg genkey > $client_private_key_path; Get-Content $client_pri
 Invoke-Expression -Command $cmd
 
 # Создание конфигурационного файла для нового пользователя
-$wg0_conf_path = "/etc/wireguard/wg0.conf"
 $server_config = @"
 # BEGIN_PEER $config_name
 [Peer]
