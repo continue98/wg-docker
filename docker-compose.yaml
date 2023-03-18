@@ -22,7 +22,8 @@ services:
       - INTERNAL_SUBNET=${WG_SUBNET}
       - ALLOWEDIPS=0.0.0.0/0
     volumes:
-      - ./config:/config
+      - ./config:/etc/wireguard
+      - ./config/client_configs:/config/client_configs
       - /lib/modules:/lib/modules
       - ./scripts:/scripts
     ports:
@@ -35,3 +36,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+volumes:
+  config:
+  scripts:
