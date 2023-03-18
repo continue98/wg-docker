@@ -15,8 +15,8 @@ else
 }
 
 # Создание директорий для конфигов
-New-Item -ItemType Directory -Path "/etc/wireguard/configs" -ErrorAction SilentlyContinue
-$config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/configs/$config_name" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path "/etc/wireguard/client_configs" -ErrorAction SilentlyContinue
+$config_current_peer_dir = New-Item -ItemType Directory -Path "/etc/wireguard/client_configs/$config_name" -ErrorAction SilentlyContinue
 
 # Определение октета для нового пользователя
 $wg0_conf_path = "/etc/wireguard/wg0.conf"
@@ -72,6 +72,10 @@ $client_config_path = "$config_current_peer_dir\$config_name.conf"
 Set-Content -Path $client_config_path -Value $client_config
 
 # Удаление сгенерированных файлов с ключами
-# Remove-Item -Path "$client_private_key_path", "$client_public_key_path", "$client_preshared_key_path" -Force
+Remove-Item -Path "$client_private_key_path", "$client_public_key_path", "$client_preshared_key_path" -Force
 
-Write-Host "Новый пользователь создан. IP-адрес: 192.168.89.$next_octet"
+Write-Host "Пользователь $config_name создан. IP-адрес: 192.168.89.$next_octet"
+
+# Генерация QR Code
+Invoke-Expression -Command "Get-Content $client_config_path | qrencode -o $config_current_peer_dir/qr.png"
+Invoke-Expression -Command "Get-Content $client_config_path | qrencode -t ansiutf8"

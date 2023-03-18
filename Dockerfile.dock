@@ -6,6 +6,7 @@ RUN curl -O https://packages.microsoft.com/config/debian/10/packages-microsoft-p
 	apt update && \
 	apt install -y powershell && \
 	apt install -y nano && \
+	apt install -y qrencode && \
 	apt update && \
 	rm -rf packages-microsoft-prod.deb
 
