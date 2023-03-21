@@ -22,10 +22,9 @@ services:
       - INTERNAL_SUBNET=${WG_SUBNET}
       - ALLOWEDIPS=0.0.0.0/0
     volumes:
-      - ./config:/etc/wireguard
-      - ./config/client_configs:/config/client_configs
+      - ~/wg-docker/config:/config
+      - ~/wg-docker/scripts:/scripts
       - /lib/modules:/lib/modules
-      - ./scripts:/scripts
     ports:
       - ${WG_PORT}:${WG_PORT}/udp
     sysctls:
@@ -36,6 +35,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-volumes:
-  config:
-  scripts:
