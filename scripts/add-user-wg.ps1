@@ -79,5 +79,5 @@ Write-Host "Пользователь $config_name создан. IP-адрес: 1
 Invoke-Expression -Command "Get-Content $client_config_path | qrencode -o $config_current_peer_dir/qr.png"
 Invoke-Expression -Command "Get-Content $client_config_path | qrencode -t ansiutf8"
 
-Invoke-Expression -Command "wg-quick down wg0"
-Invoke-Expression -Command "wg-quick up wg0"
+# Перезапуск интерфейса
+Invoke-Expression -Command "wg-quick down wg0 && wg-quick up wg0"
