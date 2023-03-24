@@ -35,8 +35,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      
     networks:
-      - wg_net
+      wg_net:
+        ipv4_address: 172.16.50.3
 
 volumes:
   config:
