@@ -11,9 +11,6 @@ RUN curl -O https://packages.microsoft.com/config/debian/10/packages-microsoft-p
         rm -rf packages-microsoft-prod.deb && \
 		apt install iptables
 
-# port forwarding to torrserve
-RUN iptables -t nat -A PREROUTING -p tcp --dport 55510 -j DNAT --to-destination 172.16.50.2:55510
-
 COPY scripts/add-user-wg.ps1 scripts/add-user-wg.ps1
 
 SHELL ["pwsh", "-c"]
